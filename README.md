@@ -1,6 +1,3 @@
-# AcousticSpace
-Deepfake Audio Detection Internship Project
-
 # 🎤 AcousticSpace
 
 AcousticSpace is a deepfake voice detection project developed as part of an internship. The project aims to detect whether an uploaded audio file is genuine or AI-generated using machine learning and audio signal processing techniques.
@@ -233,15 +230,6 @@ The project will be extended to include:
 - Performance optimization
 
 ---
-
-## Contributors
-
-- **Ravuri Dharma Teja** *(Team Leader)*
-- Project Team Members
-
----
-
-## License
 
 This project is developed for educational and internship purposes.
 
