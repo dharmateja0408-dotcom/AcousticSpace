@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Dataset
+dataset/LA/
+dataset/processed/
+
+# Trained model
+models/
+
+# Frontend
+frontend/node_modules/
+
+# macOS
+.DS_Store

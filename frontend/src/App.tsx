@@ -1,29 +1,99 @@
+import { useState } from "react";
+import axios from "axios";
 import "./App.css";
 
+import AudioUpload from "./components/AudioUpload";
+import Waveform from "./components/Waveform";
+
+interface PredictionResponse {
+  filename: string;
+  prediction: string;
+  confidence: number;
+}
+
 function App() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    setPrediction(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      setLoading(true);
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/predict",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setPrediction(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Prediction failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="container">
-      <h1>🎤 AcousticSpace Dashboard</h1>
+    <div
+      style={{
+        maxWidth: "900px",
+        margin: "40px auto",
+        padding: "20px",
+        fontFamily: "Arial",
+      }}
+    >
+      <h1>🎤 AcousticSpace</h1>
 
-      <div className="card">
-        <h2>Upload Audio</h2>
+      <h2>Audio Spoof Detection</h2>
 
-        <input type="file" accept=".wav,.mp3,.flac" />
+      <AudioUpload onFileSelect={handleFileSelect} />
 
-        <p>No file selected</p>
-      </div>
+      {selectedFile && (
+        <>
+          <p>
+            <strong>Selected:</strong> {selectedFile.name}
+          </p>
 
-      <div className="card">
-        <h2>Analysis Results</h2>
+          <Waveform file={selectedFile} />
+        </>
+      )}
 
-        <p><strong>Sample Rate:</strong> --</p>
+      {loading && (
+        <h3>Predicting...</h3>
+      )}
 
-        <p><strong>Duration:</strong> --</p>
+      {prediction && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+          }}
+        >
+          <h2>Prediction Result</h2>
 
-        <p><strong>Spectrogram:</strong> Waiting...</p>
+          <p>
+            <strong>Prediction:</strong> {prediction.prediction}
+          </p>
 
-        <p><strong>MFCC:</strong> Waiting...</p>
-      </div>
+          <p>
+            <strong>Confidence:</strong> {prediction.confidence}%
+          </p>
+        </div>
+      )}
     </div>
   );
 }
