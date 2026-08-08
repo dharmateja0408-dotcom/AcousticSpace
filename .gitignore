@@ -15,3 +15,15 @@ frontend/node_modules/
 
 # macOS
 .DS_Store
+# Runtime/generated files
+backend/app/uploads/
+backend/app/reports/
+backend/database/*.db
+
+# Backup files
+*.backup
+*.backup.*
+*backup*
+
+# ML model artifact
+backend/models/

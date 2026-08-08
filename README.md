@@ -66,7 +66,7 @@ The backend processes uploaded audio files and extracts important audio features
 ```text
 AcousticSpace
 │
-├── backend
+├── backendc
 │   ├── app.py
 │   ├── audio_processing.py
 │   ├── model.py
