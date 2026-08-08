@@ -1,0 +1,13 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+training/__pycache__
+app/__pycache__
+app/ai/__pycache__
+app/uploads/*
+app/reports/*
+database/*.db

@@ -6,34 +6,45 @@ interface WaveformProps {
 }
 
 const Waveform: React.FC<WaveformProps> = ({ file }) => {
-  const waveformRef = useRef<HTMLDivElement>(null);
+  const waveformRef = useRef<HTMLDivElement | null>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
 
   useEffect(() => {
-    if (!waveformRef.current) return;
+    if (!waveformRef.current || !file) return;
 
-    if (wavesurfer.current) {
-      wavesurfer.current.destroy();
-    }
+    wavesurfer.current?.destroy();
+
+    const url = URL.createObjectURL(file);
 
     wavesurfer.current = WaveSurfer.create({
       container: waveformRef.current,
-      waveColor: "#4F46E5",
-      progressColor: "#EF4444",
-      height: 120,
+      waveColor: "#465574",
+      progressColor: "#7086ff",
+      cursorColor: "#9aa8ff",
+      height: 90,
+      barWidth: 2,
+      barGap: 2,
+      barRadius: 3,
     });
 
-    if (file) {
-      const url = URL.createObjectURL(file);
-      wavesurfer.current.load(url);
-    }
+    wavesurfer.current.load(url);
 
     return () => {
       wavesurfer.current?.destroy();
+      URL.revokeObjectURL(url);
     };
   }, [file]);
 
-  return <div ref={waveformRef}></div>;
+  return (
+    <div className="waveform-wrapper">
+      <div className="waveform-label">
+        <span>AUDIO WAVEFORM</span>
+        <span>Preview</span>
+      </div>
+
+      <div ref={waveformRef} />
+    </div>
+  );
 };
 
 export default Waveform;

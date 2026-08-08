@@ -4,13 +4,21 @@ from pathlib import Path
 # Dataset Location
 # ==========================================
 
-DATASET_ROOT = Path(r"E:\AI_Datasets\ASVspoof2019")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-TRAIN_AUDIO_DIR = DATASET_ROOT / "ASVspoof2019_LA_train" / "flac"
+DATASET_ROOT = PROJECT_ROOT / "dataset" / "LA"
 
-DEV_AUDIO_DIR = DATASET_ROOT / "ASVspoof2019_LA_dev" / "flac"
+TRAIN_AUDIO_DIR = (
+    DATASET_ROOT / "ASVspoof2019_LA_train" / "flac"
+)
 
-PROTOCOL_DIR = DATASET_ROOT / "ASVspoof2019_LA_cm_protocols"
+DEV_AUDIO_DIR = (
+    DATASET_ROOT / "ASVspoof2019_LA_dev" / "flac"
+)
+
+PROTOCOL_DIR = (
+    DATASET_ROOT / "ASVspoof2019_LA_cm_protocols"
+)
 
 # ==========================================
 # Model Folder

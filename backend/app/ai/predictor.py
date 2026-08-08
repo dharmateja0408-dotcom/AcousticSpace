@@ -1,45 +1,45 @@
 import time
-import joblib
 import numpy as np
-import librosa
-from pathlib import Path
+import pandas as pd
 
+from app.ai.preprocessing import load_audio
 from app.ai.feature_extractor import extract_features
-
-MODEL_PATH = Path("models/deepfake_detector.pkl")
-
-# Load model once at startup
-model = joblib.load(MODEL_PATH)
+from app.ai.model_loader import model
+from app.ai.statistics import get_audio_statistics
 
 
 def predict_audio(audio_path):
 
     start = time.time()
 
-    # Load audio metadata
-    audio, sr = librosa.load(audio_path, sr=None)
+    # Load and preprocess audio
+    audio, sr = load_audio(audio_path)
 
-    duration = round(len(audio) / sr, 2)
-
+    # Extract features
     features = extract_features(audio_path)
-    features = np.array(features).reshape(1, -1)
 
-    prediction = model.predict(features)[0]
-    probabilities = model.predict_proba(features)[0]
+    # Use the same feature names used during Random Forest training
+    feature_names = [str(i) for i in range(len(features))]
+
+    features_df = pd.DataFrame(
+        [features],
+        columns=feature_names
+    )
+
+    # Model prediction
+    prediction = model.predict(features_df)[0]
+
+    probabilities = model.predict_proba(features_df)[0]
 
     confidence = round(
         float(np.max(probabilities)) * 100,
         2
     )
 
-    analysis_time = round(
-        time.time() - start,
-        3
-    )
-
+    # Label
     label = "Real" if prediction == 0 else "Spoof"
 
-    # Risk Level
+    # Risk level
     if confidence < 60:
         risk = "Low"
     elif confidence < 85:
@@ -47,11 +47,14 @@ def predict_audio(audio_path):
     else:
         risk = "High"
 
-    # AI Recommendation
+    # Audio statistics
+    statistics = get_audio_statistics(audio_path)
+
+    # Recommendation
     if label == "Spoof":
         recommendation = (
-            "This recording contains characteristics "
-            "commonly associated with synthetic or manipulated speech. "
+            "This recording contains characteristics commonly "
+            "associated with synthetic or manipulated speech. "
             "Manual verification is recommended."
         )
     else:
@@ -60,19 +63,21 @@ def predict_audio(audio_path):
             "The recording appears genuine according to the current model."
         )
 
+    analysis_time = round(
+        time.time() - start,
+        3
+    )
+
     return {
-
         "prediction": label,
-
         "confidence": confidence,
-
         "risk": risk,
-
         "recommendation": recommendation,
-
-        "duration": duration,
-
-        "sample_rate": sr,
-
+        "duration": statistics["duration"],
+        "sample_rate": statistics["sample_rate"],
+        "rms_energy": statistics["rms_energy"],
+        "zero_crossing_rate": statistics["zero_crossing_rate"],
+        "spectral_centroid": statistics["spectral_centroid"],
+        "spectral_bandwidth": statistics["spectral_bandwidth"],
         "analysis_time": analysis_time
     }
