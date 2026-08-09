@@ -12,34 +12,79 @@ def predict_audio(audio_path):
 
     start = time.time()
 
-    # Load and preprocess audio
+    # ==========================================
+    # Load audio ONCE
+    # ==========================================
+
+    load_start = time.time()
+
     audio, sr = load_audio(audio_path)
 
-    # Extract features
-    features = extract_features(audio_path)
+    load_time = time.time() - load_start
 
-    # Use the same feature names used during Random Forest training
-    feature_names = [str(i) for i in range(len(features))]
+    # ==========================================
+    # Feature extraction
+    # ==========================================
+
+    feature_start = time.time()
+
+    features = extract_features(audio, sr)
+
+    feature_time = time.time() - feature_start
+
+    # ==========================================
+    # Prepare features
+    # ==========================================
+
+    feature_names = [
+        str(i)
+        for i in range(len(features))
+    ]
 
     features_df = pd.DataFrame(
         [features],
         columns=feature_names
     )
 
+    # ==========================================
     # Model prediction
-    prediction = model.predict(features_df)[0]
+    # ==========================================
 
-    probabilities = model.predict_proba(features_df)[0]
+    inference_start = time.time()
+
+    prediction = model.predict(
+        features_df
+    )[0]
+
+    probabilities = model.predict_proba(
+        features_df
+    )[0]
+
+    inference_time = time.time() - inference_start
+
+    # ==========================================
+    # Confidence
+    # ==========================================
 
     confidence = round(
         float(np.max(probabilities)) * 100,
         2
     )
 
+    # ==========================================
     # Label
-    label = "Real" if prediction == 0 else "Spoof"
+    # ==========================================
 
-    # Risk level
+    label = (
+        "Real"
+        if prediction == 0
+        else "Spoof"
+    )
+
+    # ==========================================
+    # Risk
+    # ==========================================
+
     if confidence < 60:
         risk = "Low"
     elif confidence < 85:
@@ -47,21 +92,45 @@ def predict_audio(audio_path):
     else:
         risk = "High"
 
+    # ==========================================
     # Audio statistics
-    statistics = get_audio_statistics(audio_path)
+    # ==========================================
 
+    statistics_start = time.time()
+
+    statistics = get_audio_statistics(
+        audio,
+        sr
+    )
+
+    statistics_time = (
+        time.time() - statistics_start
+    )
+
+    # ==========================================
     # Recommendation
+    # ==========================================
+
     if label == "Spoof":
+
         recommendation = (
-            "This recording contains characteristics commonly "
-            "associated with synthetic or manipulated speech. "
-            "Manual verification is recommended."
+            "This recording contains characteristics "
+            "commonly associated with synthetic or "
+            "manipulated speech. Manual verification "
+            "is recommended."
         )
+
     else:
+
         recommendation = (
-            "No significant spoofing characteristics were detected. "
-            "The recording appears genuine according to the current model."
+            "No significant spoofing characteristics "
+            "were detected. The recording appears "
+            "genuine according to the current model."
         )
+
+    # ==========================================
+    # Total analysis time
+    # ==========================================
 
     analysis_time = round(
         time.time() - start,
@@ -69,15 +138,40 @@ def predict_audio(audio_path):
     )
 
     return {
+
         "prediction": label,
+
         "confidence": confidence,
+
         "risk": risk,
+
         "recommendation": recommendation,
+
         "duration": statistics["duration"],
+
         "sample_rate": statistics["sample_rate"],
+
         "rms_energy": statistics["rms_energy"],
-        "zero_crossing_rate": statistics["zero_crossing_rate"],
-        "spectral_centroid": statistics["spectral_centroid"],
-        "spectral_bandwidth": statistics["spectral_bandwidth"],
-        "analysis_time": analysis_time
+
+        "zero_crossing_rate":
+            statistics["zero_crossing_rate"],
+
+        "spectral_centroid":
+            statistics["spectral_centroid"],
+
+        "spectral_bandwidth":
+            statistics["spectral_bandwidth"],
+
+        "analysis_time": analysis_time,
+
+        # Performance metrics
+        "load_time": round(load_time, 4),
+
+        "feature_time": round(feature_time, 4),
+
+        "inference_time":
+            round(inference_time, 4),
+
+        "statistics_time":
+            round(statistics_time, 4)
     }

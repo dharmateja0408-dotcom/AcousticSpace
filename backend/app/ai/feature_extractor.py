@@ -2,9 +2,7 @@ import librosa
 import numpy as np
 
 
-def extract_features(audio_path):
-
-    y, sr = librosa.load(audio_path, sr=16000)
+def extract_features(y, sr):
 
     mfcc = librosa.feature.mfcc(
         y=y,
@@ -42,23 +40,14 @@ def extract_features(audio_path):
     rms = librosa.feature.rms(y=y)
 
     features = np.hstack([
-
         np.mean(mfcc, axis=1),
-
         np.mean(chroma, axis=1),
-
         np.mean(contrast, axis=1),
-
         np.mean(centroid),
-
         np.mean(bandwidth),
-
         np.mean(rolloff),
-
         np.mean(zcr),
-
         np.mean(rms)
-
     ])
 
     return features

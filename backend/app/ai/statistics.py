@@ -2,14 +2,20 @@ import librosa
 import numpy as np
 
 
-def get_audio_statistics(audio_path):
-    y, sr = librosa.load(audio_path, sr=None)
+def get_audio_statistics(y, sr):
 
-    duration = librosa.get_duration(y=y, sr=sr)
+    duration = librosa.get_duration(
+        y=y,
+        sr=sr
+    )
 
-    rms = np.mean(librosa.feature.rms(y=y))
+    rms = np.mean(
+        librosa.feature.rms(y=y)
+    )
 
-    zcr = np.mean(librosa.feature.zero_crossing_rate(y=y))
+    zcr = np.mean(
+        librosa.feature.zero_crossing_rate(y=y)
+    )
 
     centroid = np.mean(
         librosa.feature.spectral_centroid(
